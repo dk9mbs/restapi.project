@@ -231,6 +231,10 @@ html, body {
 }
 </style>
 
+<script>
+var field=\'project_sprint_id\';
+</script>
+
 <script language="javascript">
     let draggedTask;
     
@@ -258,10 +262,18 @@ html, body {
         var activityId=draggedTask.id.split(\'_\')[1];
         var activityType=draggedTask.id.split(\'_\')[0];
         var targetLaneId=targetColumnId.split(\'_\')[1];
-        var data=JSON.stringify({
-            id: activityId,
-            lane_id: targetLaneId
-        });
+        if (field==\'board_id\') {
+            var data=JSON.stringify({
+                id: activityId,
+                lane_id: targetLaneId
+            });
+        }
+        if (field==\'project_sprint_id\') {
+            var data=JSON.stringify({
+                id: activityId,
+                project_sprint_id: targetLaneId
+            });
+        }
         xmlHttpRequest("PUT", `/api/v1.0/data/api_activity/${activityId}`,"tag", data, function(tag, data) {onChangeDataStatus(false, \'\');})
     }
     
@@ -346,6 +358,52 @@ html, body {
 			});
 		});	
 	}
+
+
+	function loadLanesSprint() {
+		xmlHttpRequest("GET", "/api/v1.0/data/project_activity_sprint?filter_field_name=status_id&filter_value=2","main_board",undefined, function(tag, data) {
+            var backlogLane=[{"id": -1, "name": "Backlog"}];
+			document.getElementById(tag).innerHTML = generateLanes(backlogLane) + generateLanes(data);
+
+            /*  start backlog */
+			backlogLane.forEach(element => {
+				var fetchXml=`<restapi type="select">
+					<filter type="AND">
+						<condition field="type_id" value="1" operator="neq"/>
+						<condition field="status_id" value="100" operator="neq"/>
+						<condition field="project_sprint_id" operator="null"/>
+					</filter>
+					<orderby>
+						<field name="due_date" sort="ASC"/>
+					</orderby>
+				</restapi>`;
+				xmlHttpRequest("POST", "/api/v1.0/data/search/api_activity",`lane_${element.id}`,fetchXml, function(tag, data) {
+					document.getElementById(tag).innerHTML = document.getElementById(tag).innerHTML + generateTasksElements(data);
+			});
+				
+			});
+            /* end backlog */
+
+			data.forEach(element => {
+				var fetchXml=`<restapi type="select">
+					<filter type="AND">
+						<condition field="type_id" value="1" operator="neq"/>
+						<condition field="status_id" value="100" operator="neq"/>
+						<condition field="project_sprint_id" value="${element[\'id\']}" operator="eq"/>
+					</filter>
+					<orderby>
+						<field name="due_date" sort="ASC"/>
+					</orderby>
+				</restapi>`;
+				xmlHttpRequest("POST", "/api/v1.0/data/search/api_activity",`lane_${element.id}`,fetchXml, function(tag, data) {
+					document.getElementById(tag).innerHTML = document.getElementById(tag).innerHTML + generateTasksElements(data);
+			});
+				
+			});
+		});	
+	}
+
+
     </script>
 
 
@@ -366,7 +424,8 @@ html, body {
 </div>
 
 <script language="javascript">
-    loadLanes();
+    /*loadLanes();*/
+    loadLanesSprint();
 </script>
 
 </body>
