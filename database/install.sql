@@ -164,7 +164,7 @@ html, body {
 .kanban-board {
     display: flex;
     overflow-x: auto;
-    padding: 20px;
+    padding: 0px;
 }
 
 .column {
@@ -180,7 +180,7 @@ html, body {
 
 .backlog {
     background-color: rgb(250, 248, 248);
-    border: 2px solid #bdbbbb;
+    border: 2px solid #bdbbbb; height: 99%;
     .column-header {
         color: #3498db;
     }
@@ -439,9 +439,12 @@ var field=\'project_sprint_id\';
 </head>
 <body>
 
-        <div id="content">
-        </div>
+        <div id="content" style="display: grid;padding: 20px;">
 
+<div class="d-grid gap-2 d-md-block">
+  <button class="btn btn-primary" type="button" onclick="window.open(\'https://dk9mbs.de/api/v1.0/data/api_activity?view=%24default_ui\');">Neue Aufgabe</button>
+  <button class="btn btn-primary" type="button" onclick="loadLanesSprint();">Refresh</button>
+</div>
 
 <div class="kanban-board" id="main_board" style="width: 100%">
 	<!-- Hier der Main Content! -->
@@ -454,6 +457,7 @@ var field=\'project_sprint_id\';
 </div>
 
 
+        </div>
 
 
 
