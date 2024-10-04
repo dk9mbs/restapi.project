@@ -141,6 +141,12 @@ INSERT IGNORE INTO api_portal (id,name, template, solution_id) VALUES (
 UPDATE api_portal SET template='<!DOCTYPE html>
 <html lang="en">
 <head>
+
+<!-- Start Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
+<!-- End Bootstrap -->
+
 <style>
 html, body {
     font-family: Arial, sans-serif;
@@ -304,6 +310,11 @@ var field=\'project_sprint_id\';
                 <div class="task-image-column" style="background-color: ${task[\'__due_date_color@formatted_value\']};"></div>
                 <div class="task-details">
                   <div class="task-title">${task.subject}</div>
+				  <div class="form-check form-switch">
+					  <input class="form-check-input" type="checkbox" id="done_${task.id}" onclick="setTaskDone(${task.id}, this.checked);">
+					  <label class="form-check-label" for="done_${task.id}">Erledigt</label>
+				   </div>
+
                   <div class="task-details-text">${task[\'__board_id@name\']}</div>
                   <div class="task-details-text">${task[\'__due_date@formatted_value\']}</div>
                   <div class="task-details-text">${task[\'__status_id@name\']}</div>
@@ -316,6 +327,23 @@ var field=\'project_sprint_id\';
             .join("");
     }
     
+	function setTaskDone(activityId, checked) {
+		var statusCode=0;
+		
+		if(checked==true){
+			statusCode=100;
+		} else {
+			statusCode=10;
+		}
+		
+		var data=JSON.stringify({
+			id: activityId,
+			status_id: statusCode
+		});
+        xmlHttpRequest("PUT", `/api/v1.0/data/api_activity/${activityId}`,"tag", data, function(tag, data) {onChangeDataStatus(false, \'\');})
+		
+	}
+	
     function xmlHttpRequest(method, url, tag, data, callBack) {
         const xhr = new XMLHttpRequest();
         xhr.open(method, url);
@@ -372,6 +400,7 @@ var field=\'project_sprint_id\';
 						<condition field="type_id" value="1" operator="neq"/>
 						<condition field="status_id" value="100" operator="neq"/>
 						<condition field="project_sprint_id" operator="null"/>
+
 					</filter>
 					<orderby>
 						<field name="due_date" sort="ASC"/>
@@ -413,6 +442,7 @@ var field=\'project_sprint_id\';
         <div id="content">
         </div>
 
+
 <div class="kanban-board" id="main_board" style="width: 100%">
 	<!-- Hier der Main Content! -->
 	{{ content }}
@@ -422,6 +452,10 @@ var field=\'project_sprint_id\';
       <div class="column-header">Plaese wait ...</div>
     </div>
 </div>
+
+
+
+
 
 <script language="javascript">
     /*loadLanes();*/
